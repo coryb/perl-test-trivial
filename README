@@ -1,0 +1,193 @@
+Perl Test Module which automatically figures out
+the comment section of each line for you.  Basically this
+modules allows you to create perl tests with less typing
+and less clutter of your test cases.  It can handle "TODO"
+test and TRY exception handling.
+
+=================================================================
+Command Usage:
+=================================================================
+
+On any test case you can use:
+--verbose:    option to display all input and output for each case
+--fatal:      case the test to exit at the first "not ok" failure.
+--diff=<fmt>: change diff format for multiline diffs
+--log:        log verbose output to a file (default <basename>.log)
+--log=<file>: log verbose output to <file>
+
+=================================================================
+Envrionment:
+=================================================================
+TEST_TRIVIAL_LOG: log verbose output to a file
+
+=================================================================
+Module Options:
+=================================================================
+
+# use with no plan
+use Test::Trivial;
+
+# to have a plan with 23 tests
+use Test::Trivial tests => 23;
+
+# to skip all tests in file
+use Test::Trivial skip_all => "message";
+
+# For Diff output you can specify the diff
+# format (must be supported by Text::Diff)
+# The default is "Unified"
+use Test::Trivial tests => $count, diff => 'Table';
+
+=================================================================
+Test Usage:
+=================================================================
+
+# check for boolean truth
+OK $boolean;
+
+# compare two variables
+IS $got => $expected;
+
+# this will do recursive is_deeply by default
+# if both $got and $expected are references
+IS $got_data => $expected_data;
+
+# use ID if you want to compare two pointers
+# to see if they are a reference to the same
+# object
+ID $got_data => $expected_data;
+
+# like IS but enforce numerical context
+EQ $got_num => $expected_num;
+
+LIKE $got => qr/$expected/;
+
+# to expect a false answer you can use:
+NOK $boolean;
+ISNT $got => $expected;
+UNLIKE $got =~ qr/$expected/;
+
+# if a test is know to fail you can add
+# a TODO prefix to any above action:
+
+TODO OK $boolean;
+TODO IS $got => $expected;
+TODO LIKE $got => qr/$expected/;
+
+=================================================================
+Examples:
+=================================================================
+
+use strict;
+use warnings;
+use Test::Trivial tests => 29;
+
+my @a=(1,2,3);
+OK @a;
+OK @a == 3;
+TODO OK @a == 4;
+IS @a, 3;
+TODO IS "abc", "def";
+TODO IS 4, 5;
+IS [4], [4];
+IS [{a=>1}], [{a=>1}];
+TODO IS [{a=>1, b=>2}], [{a=>1}];
+EQ 4, 4;
+TODO EQ 4 => 5;
+TODO EQ [4] => [4];
+TODO ID [4] => [4];
+my $ref = [4];
+ID $ref => $ref;
+ISNT 5, 6 or die;
+IS substr("abcdef",0,3), "abc";
+LIKE "acb", qr/^a/;
+TODO UNLIKE "abc", qr/^a/;
+
+=================================================================
+OUTPUT:
+=================================================================
+
+1..29
+ok 1 - @a
+ok 2 - @a == 3
+# Time: 2009-03-04 19:33:18
+./test.t:8:6: Test 3 Failed
+not ok 3 - @a == 4 # TODO Test Know to fail
+#   Failed (TODO) test '@a == 4'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
+ok 4 - @a == 3
+# Time: 2009-03-04 19:33:18
+./test.t:10:6: Test 6 Failed
+not ok 5 - "abc" == "def" # TODO Test Know to fail
+#   Failed (TODO) test '"abc" == "def"'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
+#          got: 'abc'
+#     expected: 'def'
+# Time: 2009-03-04 19:33:18
+./test.t:11:6: Test 7 Failed
+not ok 6 - 4 == 5 # TODO Test Know to fail
+#   Failed (TODO) test '4 == 5'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
+#          got: '4'
+#     expected: '5'
+ok 7 - [4] == [4]
+ok 8 - [{a=>1}] == [{a=>1}]
+# Time: 2009-03-04 19:33:18
+./test.t:14:6: Test 10 Failed
+not ok 9 - [{a=>1, b=>2}] == [{a=>1}] # TODO Test Know to fail
+#   Failed (TODO) test '[{a=>1, b=>2}] == [{a=>1}]'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
+#     Structures begin differing at:
+#          $got->[0]{b} = '2'
+#     $expected->[0]{b} = Does not exist
+ok 10 - 4 == 4
+# Time: 2009-03-04 19:33:18
+./test.t:16:6: Test 11 Failed
+not ok 11 - 4 == 5 # TODO Test Know to fail
+#   Failed (TODO) test '4 == 5'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 132.
+#          got: '4'
+#     expected: '5'
+# Time: 2009-03-04 19:33:18
+./test.t:17:6: Test 12 Failed
+not ok 12 - [4] == [4] # TODO Test Know to fail
+#   Failed (TODO) test '[4] == [4]'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 132.
+#          got: 'ARRAY(0x1245fc0)'
+#     expected: 'ARRAY(0x1245e40)'
+# Time: 2009-03-04 19:33:18
+./test.t:18:6: Test 13 Failed
+not ok 13 - [4] == [4] # TODO Test Know to fail
+#   Failed (TODO) test '[4] == [4]'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 144.
+#          got: 'ARRAY(0x1248bcc)'
+#     expected: 'ARRAY(0x1248b48)'
+ok 14 - $ref == $ref
+ok 15 - 5 != 6
+ok 16 - substr("abcdef",0,3) == "abc"
+ok 17 - "acb" =~ qr/^a/
+# Time: 2009-03-04 19:33:18
+./test.t:24:6: Test 18 Failed
+not ok 18 - "abc" !~ qr/^a/ # TODO Test Know to fail
+#   Failed (TODO) test '"abc" !~ qr/^a/'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 220.
+#                   'abc'
+#           matches '(?-xism:^a)'
+ok 19 - not [die]
+ok 20 - 1 == 1
+ok 21 - not [undef->foobar]
+ok 22 - die "err\n" == "err\n"
+ok 23 - die "err" =~ qr/err/
+ok 24 - die "err" !~ qr/boo/
+# Time: 2009-03-04 19:33:18
+./test.t:32:10: Test 24 Failed
+not ok 25 - 1 == 0 # TODO Test Know to fail
+#   Failed (TODO) test '1 == 0'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
+# Time: 2009-03-04 19:33:18
+./test.t:33:10: Test 25 Failed
+not ok 26 - undef->foobar # TODO Test Know to fail
+#   Failed (TODO) test 'undef->foobar'
+#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
+# Time: 2009-03-04 19:33:18
+./test.t:34:10: Test 27 Failed
