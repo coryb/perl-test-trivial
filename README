@@ -1,193 +1,590 @@
-Perl Test Module which automatically figures out
-the comment section of each line for you.  Basically this
-modules allows you to create perl tests with less typing
-and less clutter of your test cases.  It can handle "TODO"
-test and TRY exception handling.
+NAME
+    Test::Trivial - Declutter and simplify tests
 
-=================================================================
-Command Usage:
-=================================================================
+SYNOPSIS
+    use Test::Trivial tests => 11;
 
-On any test case you can use:
---verbose:    option to display all input and output for each case
---fatal:      case the test to exit at the first "not ok" failure.
---diff=<fmt>: change diff format for multiline diffs
---log:        log verbose output to a file (default <basename>.log)
---log=<file>: log verbose output to <file>
+    OK $expression;
 
-=================================================================
-Envrionment:
-=================================================================
-TEST_TRIVIAL_LOG: log verbose output to a file
+    NOK $expression;
 
-=================================================================
-Module Options:
-=================================================================
+    IS $got => $expected;
 
-# use with no plan
-use Test::Trivial;
+    ISNT $got => $expected;
 
-# to have a plan with 23 tests
-use Test::Trivial tests => 23;
+    ISA $obj => $class;
 
-# to skip all tests in file
-use Test::Trivial skip_all => "message";
+    ID $refA => $refB;
 
-# For Diff output you can specify the diff
-# format (must be supported by Text::Diff)
-# The default is "Unified"
-use Test::Trivial tests => $count, diff => 'Table';
+    EQ $numA => $numB;
 
-=================================================================
-Test Usage:
-=================================================================
+    LIKE $got => qr/regex/;
 
-# check for boolean truth
-OK $boolean;
+    UNLIKE $got => qr/regex/;
 
-# compare two variables
-IS $got => $expected;
+    IS ERR { die "OMG No!\n" } => "OMG No!\n";
 
-# this will do recursive is_deeply by default
-# if both $got and $expected are references
-IS $got_data => $expected_data;
+    TODO IS $got, $expected;
 
-# use ID if you want to compare two pointers
-# to see if they are a reference to the same
-# object
-ID $got_data => $expected_data;
+DESCRIPTION
+    "Test::Trivial" was written to allow test writters to trivially write
+    tests while still allowing the test code to be readable. The output upon
+    failure has been modified to provide better diagnostics when things go
+    wrong, including the source line number for the failed test. Global
+    getopt options are automatically added to all tests files to allow for
+    easier debugging when things go wrong.
 
-# like IS but enforce numerical context
-EQ $got_num => $expected_num;
+  OPTIONS
+   --verbose
+    --verbose passed on the command line to any Test::Trivial test file will
+    automatically print out verbose data for each test. Primarily this will
+    use Data::Dumper to print out the arguments to the various operators.
 
-LIKE $got => qr/$expected/;
+   --fatal
+    --fatal passed will automatically cause the test run to abort on the
+    first (non TODO) "not ok" check.
 
-# to expect a false answer you can use:
-NOK $boolean;
-ISNT $got => $expected;
-UNLIKE $got =~ qr/$expected/;
+   --log[=<file>]
+    --log can be used to force verbose log to the the given log file name
+    (default $0.log) while allowing non-verbose output to go to the
+    terminal. This can be useful to diagnose bugs that happen during the
+    night when run under some automated testing.
 
-# if a test is know to fail you can add
-# a TODO prefix to any above action:
+  OK
+    Takes one argument which will be evaluated for boolean truth. The
+    expression will be evaluated in scalar context.
 
-TODO OK $boolean;
-TODO IS $got => $expected;
-TODO LIKE $got => qr/$expected/;
+    Examples:
 
-=================================================================
-Examples:
-=================================================================
+        OK 1 + 1 == 2;
+        # output:
+        # ok 1 - 1 + 1 == 2
+    
+        OK 1 + 1 == 3;
+        # output:
+        # # Time: 2012-02-28 12:20:19 PM
+        # ./example.t:5:1: Test 2 Failed
+        # not ok 2 - 1 + 1 == 3
+        # #   Failed test '1 + 1 == 3'
+    
+        @array = (1,2,3);
+        OK @array;
+        # output:
+        # ok 3 - @array
+    
+        @array = ();
+        OK @array;
+        # output:
+        # # Time: 2012-02-28 12:20:19 PM
+        # ./example.t:18:1: Test 4 Failed
+        # not ok 4 - @array
+        # #   Failed test '@array'
 
-use strict;
-use warnings;
-use Test::Trivial tests => 29;
+  NOK
+    Takes one argument which is evaluated for boolean false. The expression
+    will be evaluated in scalar context.
 
-my @a=(1,2,3);
-OK @a;
-OK @a == 3;
-TODO OK @a == 4;
-IS @a, 3;
-TODO IS "abc", "def";
-TODO IS 4, 5;
-IS [4], [4];
-IS [{a=>1}], [{a=>1}];
-TODO IS [{a=>1, b=>2}], [{a=>1}];
-EQ 4, 4;
-TODO EQ 4 => 5;
-TODO EQ [4] => [4];
-TODO ID [4] => [4];
-my $ref = [4];
-ID $ref => $ref;
-ISNT 5, 6 or die;
-IS substr("abcdef",0,3), "abc";
-LIKE "acb", qr/^a/;
-TODO UNLIKE "abc", qr/^a/;
+    Examples:
 
-=================================================================
-OUTPUT:
-=================================================================
+        NOK 1 + 1 == 2;
+        # output:
+        # # Time: 2012-02-28 12:25:45 PM
+        # ./example.t:1:1: Test 1 Failed
+        # not ok 1 - not [1 + 1 == 2]
+        # #   Failed test 'not [1 + 1 == 2]'
+    
+        NOK 1 + 1 == 3;
+        # output:
+        # ok 2 - not [1 + 1 == 3]
+    
+        @array = (1,2,3);
+        NOK @array;
+        # output:
+        # # Time: 2012-02-28 12:25:45 PM
+        # ./example.t:13:1: Test 3 Failed
+        # not ok 3 - not [@array]
+        # #   Failed test 'not [@array]'
+    
+        @array = ();
+        NOK @array;
+        # output:
+        # ok 4 - not [@array]
 
-1..29
-ok 1 - @a
-ok 2 - @a == 3
-# Time: 2009-03-04 19:33:18
-./test.t:8:6: Test 3 Failed
-not ok 3 - @a == 4 # TODO Test Know to fail
-#   Failed (TODO) test '@a == 4'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
-ok 4 - @a == 3
-# Time: 2009-03-04 19:33:18
-./test.t:10:6: Test 6 Failed
-not ok 5 - "abc" == "def" # TODO Test Know to fail
-#   Failed (TODO) test '"abc" == "def"'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
-#          got: 'abc'
-#     expected: 'def'
-# Time: 2009-03-04 19:33:18
-./test.t:11:6: Test 7 Failed
-not ok 6 - 4 == 5 # TODO Test Know to fail
-#   Failed (TODO) test '4 == 5'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
-#          got: '4'
-#     expected: '5'
-ok 7 - [4] == [4]
-ok 8 - [{a=>1}] == [{a=>1}]
-# Time: 2009-03-04 19:33:18
-./test.t:14:6: Test 10 Failed
-not ok 9 - [{a=>1, b=>2}] == [{a=>1}] # TODO Test Know to fail
-#   Failed (TODO) test '[{a=>1, b=>2}] == [{a=>1}]'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 180.
-#     Structures begin differing at:
-#          $got->[0]{b} = '2'
-#     $expected->[0]{b} = Does not exist
-ok 10 - 4 == 4
-# Time: 2009-03-04 19:33:18
-./test.t:16:6: Test 11 Failed
-not ok 11 - 4 == 5 # TODO Test Know to fail
-#   Failed (TODO) test '4 == 5'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 132.
-#          got: '4'
-#     expected: '5'
-# Time: 2009-03-04 19:33:18
-./test.t:17:6: Test 12 Failed
-not ok 12 - [4] == [4] # TODO Test Know to fail
-#   Failed (TODO) test '[4] == [4]'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 132.
-#          got: 'ARRAY(0x1245fc0)'
-#     expected: 'ARRAY(0x1245e40)'
-# Time: 2009-03-04 19:33:18
-./test.t:18:6: Test 13 Failed
-not ok 13 - [4] == [4] # TODO Test Know to fail
-#   Failed (TODO) test '[4] == [4]'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 144.
-#          got: 'ARRAY(0x1248bcc)'
-#     expected: 'ARRAY(0x1248b48)'
-ok 14 - $ref == $ref
-ok 15 - 5 != 6
-ok 16 - substr("abcdef",0,3) == "abc"
-ok 17 - "acb" =~ qr/^a/
-# Time: 2009-03-04 19:33:18
-./test.t:24:6: Test 18 Failed
-not ok 18 - "abc" !~ qr/^a/ # TODO Test Know to fail
-#   Failed (TODO) test '"abc" !~ qr/^a/'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 220.
-#                   'abc'
-#           matches '(?-xism:^a)'
-ok 19 - not [die]
-ok 20 - 1 == 1
-ok 21 - not [undef->foobar]
-ok 22 - die "err\n" == "err\n"
-ok 23 - die "err" =~ qr/err/
-ok 24 - die "err" !~ qr/boo/
-# Time: 2009-03-04 19:33:18
-./test.t:32:10: Test 24 Failed
-not ok 25 - 1 == 0 # TODO Test Know to fail
-#   Failed (TODO) test '1 == 0'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
-# Time: 2009-03-04 19:33:18
-./test.t:33:10: Test 25 Failed
-not ok 26 - undef->foobar # TODO Test Know to fail
-#   Failed (TODO) test 'undef->foobar'
-#   at /home/y/lib/perl5/site_perl/Test/Trivial.pm line 106.
-# Time: 2009-03-04 19:33:18
-./test.t:34:10: Test 27 Failed
+  IS
+    Takes two arguments and compares the values (or structures if
+    references). The arguments will be evaluated in scalar context. If the
+    inputs are strings with embedded newlines then Text::Diff will be used
+    to print out the differences when the strings dont match. If the inputs
+    are references then the structures will be compared recusively for
+    equivalence.
+
+    Examples:
+
+        my $string = "abc";
+        IS $string => "abc";
+        # output:
+        # ok 1 - $string == "abc"
+    
+        my @array = (1,2,3);
+        IS @array => 3;
+        # output: 
+        # ok 2 - @array == 3
+    
+        IS "a\nb\n" => "a\nc\n";
+        # output:
+        # # Time: 2012-02-28 01:27:33 PM
+        # ./example.t:10:1: Test 3 Failed
+        # not ok 3 - "a\nb\n" == "a\nc\n"
+        # #   Failed test '"a\nb\n" == "a\nc\n"'
+        # # --- got
+        # # +++ expected
+        # # @@ -1,2 +1,2 @@
+        # #  a
+        # # -b
+        # # +c
+    
+        IS [1,2,3,5,8], [1,2,3,5,8];
+        # output: 
+        # ok 4 - [1,2,3,5,8] == [1,2,3,5,8]
+    
+        IS [{a=>1}], [{b=>1}];
+        # output: 
+        # # Time: 2012-02-28 01:27:33 PM
+        # ./example.t:26:1: Test 5 Failed
+        # not ok 5 - [{a=>1}] == [{b=>1}]
+        # #   Failed test '[{a=>1}] == [{b=>1}]'
+        # #     Structures begin differing at:
+        # #          $got->[0]{b} = Does not exist
+        # #     $expected->[0]{b} = '1'
+    
+        IS substr("abcdef",0,3), "abc";
+        # output:
+        # ok 6 - substr("abcdef",0,3) == "abc"
+
+  ISNT
+    Takes two arguments and compares the values (or structures if
+    references) for non equivalence. The arguments will be evaluated in
+    scalar context. If the inputs are references then the structures will be
+    compared recusively for non equivalence.
+
+    Examples:
+
+        my $string = "abc";
+        ISNT $string => "abc";
+        # output:
+        # # Time: 2012-02-28 01:45:18 PM
+        # ./example.t:2:1: Test 1 Failed
+        # not ok 1 - $string != "abc"
+        # #   Failed test '$string != "abc"'
+        # #          got: 'abc'
+        # #     expected: anything else
+    
+        my @array = (1,2,3);
+        ISNT @array => 3;
+        # output: 
+        # # Time: 2012-02-28 01:45:18 PM
+        # ./example.t:12:1: Test 2 Failed
+        # not ok 2 - @array != 3
+        # #   Failed test '@array != 3'
+        # #          got: '3'
+        # #     expected: anything else
+    
+        ISNT "a\nb" => "a\nc";
+        # output:
+        # ok 3 - "a\nb" != "a\nc"
+    
+        ISNT [1,2,3,5,8], [1,2,3,5,8];
+        # output: 
+        # not ok 4 - [1,2,3,5,8] != [1,2,3,5,8]
+        # #   Failed test '[1,2,3,5,8] != [1,2,3,5,8]'
+    
+        ISNT [{a=>1}], [{b=>1}];
+        # output: 
+        # ok 5 - [{a=>1}] != [{b=>1}]
+    
+        ISNT substr("abcdef",0,3), "abc";
+        # output:
+        # # Time: 2012-02-28 01:45:18 PM
+        # ./example.t:34:1: Test 6 Failed
+        # not ok 6 - substr("abcdef",0,3) != "abc"
+        # #   Failed test 'substr("abcdef",0,3) != "abc"'
+        # #          got: 'abc'
+        # #     expected: anything else
+
+  ISA
+    Takes two arguments and checks to see if the first argument is a
+    reference that inherits from the class/type of the second argument.
+
+    Examples:
+
+        ISA [] => "ARRAY";
+        # output:
+        # ok 1 - [] ISA "ARRAY"
+    
+        ISA {} => "HASH";
+        # output:
+        # ok 2 - {} ISA "HASH"
+    
+        ISA qr/ABC/ => "REGEXP";
+        # output:
+        # ok 3 - qr/ABC/ ISA "REGEXP"
+
+        ISA \*STDIO => "GLOB";
+        # output:
+        # ok 4 - \*STDIO ISA "GLOB"
+    
+        my $io = IO::File->new();
+        ISA $io => "IO::File";
+        # output:
+        # ok 5 - $io ISA "IO::File"
+    
+        ISA $io => "IO::Handle";
+        # output:
+        # ok 6 - $io ISA "IO::Handle"
+    
+        ISA $io => "Exporter";
+        # output:
+        # ok 7 - $io ISA "Exporter"
+    
+        ISA $io => "GLOB";
+        # output:
+        # ok 8 - $io ISA "GLOB"
+    
+        ISA $io => "ARRAY";
+        # output:
+        # # Time: 2012-02-28 02:03:20 PM
+        # ./example.t:34:1: Test 9 Failed
+        # not ok 9 - $io ISA "ARRAY"
+        # #   Failed test '$io ISA "ARRAY"'
+    
+        ISA $io => "IO::Socket";
+        # output:
+        # # Time: 2012-02-28 02:03:20 PM
+        # ./example.t:41:1: Test 10 Failed
+        # not ok 10 - $io ISA "IO::Socket"
+        # #   Failed test '$io ISA "IO::Socket"'
+
+  ID
+    Takes two arguments and compares them for exact values. ID is similar to
+    IS except that references are compared literally (ie the reference
+    address is compared) instead of recusively comparing the data
+    structures.
+
+    Examples:
+
+        my $arr1 = my $arr2 = [];
+        ID $arr1 => $arr2;
+        # output:
+        # ok 1 - $arr1 == $arr2
+    
+        ID $arr1 => [];
+        # output:
+        # # Time: 2012-02-28 02:35:38 PM
+        # ./example.t:6:1: Test 2 Failed
+        # not ok 2 - $arr1 == []
+        # #   Failed test '$arr1 == []'
+        # #          got: 'ARRAY(0x186fd80)'
+        # #     expected: 'ARRAY(0x188c588)'
+    
+        my $hash1 = $hash2 = {};
+        ID $hash1 => $hash2;
+        # output:
+        # ok 3 - $hash1 == $hash2
+    
+        ID $hash1 => {};
+        # output:
+        # # Time: 2012-02-28 02:35:38 PM
+        # ./example.t:20:1: Test 4 Failed
+        # not ok 4 - $hash1 == {}
+        # #   Failed test '$hash1 == {}'
+        # #          got: 'HASH(0x189bcc8)'
+        # #     expected: 'HASH(0x1ee95b8)'
+    
+        my %hash = ();
+        my $hash3 = \%hash;
+    
+        ID $hash3 => \%hash;
+        # output:
+        # ok 5 - $hash3 == \%hash
+
+  EQ
+    Takes two arguments and compares them for numeric equivalence.
+
+    Examples:
+
+        EQ 12 => 12;
+        # output:
+        # ok 1 - 12 == 12
+    
+        EQ 12.00001 => 12;
+        # output:
+        # # Time: 2012-02-28 03:16:49 PM
+        # ./example.t:4:1: Test 2 Failed
+        # not ok 2 - 12.00001 == 12
+        # #   Failed test '12.00001 == 12'
+        # #          got: '12.00001'
+        # #     expected: '12'
+    
+        EQ 12.0 => 12;
+        # output:
+        # ok 3 - 12.0 == 12
+    
+        EQ 12.0 / 1.0 => 12;
+        # output:
+        # ok 4 - 12.0 / 1.0 == 12
+    
+        EQ 0.12E2 => 12;
+        # output:
+        # ok 5 - 0.12E2 == 12
+    
+        EQ 1200E-2 => 12;
+        # output:
+        # ok 6 - 1200E-2 == 12
+    
+        EQ 0x0C => 12;
+        # output:
+        # ok 7 - 0x0C == 12
+    
+        EQ 014 => 12;
+        # output:
+        # ok 8 - 014 == 12
+    
+        EQ 0b001100 => 12;
+        # output:
+        # ok 9 - 0b001100 == 12
+    
+        EQ "12" => 12;
+        # output:
+        # ok 10 - "12" == 12
+    
+        EQ "12.0" => 12;
+        # output:
+        # ok 11 - "12.0" == 12
+    
+        EQ "0.12E2" => 12;
+        # output:
+        # ok 12 - "0.12E2" == 12
+    
+        EQ "1200E-2" => 12;
+        # output:
+        # ok 13 - "1200E-2" == 12
+
+        EQ "12 Monkeys" => 12;
+        # output:
+        # ok 14 - "12 Monkeys" == 12
+
+  LIKE
+    Takes two arguments, the first argument should be a string, and the
+    second argument should be a REGEXP. The regex will be run against the
+    string to verify that there is a successful match.
+
+    Examples:
+
+        LIKE "abc" => qr{^a};
+        # output:
+        # ok 1 - "abc" =~ qr{^a}
+    
+        LIKE "ABC" => qr{^a}i;
+        # output:
+        # ok 2 - "ABC" =~ qr{^a}i
+    
+        LIKE "ABC" => qr/^(?i:a)/;
+        # output:
+        # ok 3 - "ABC" =~ qr/^(?i:a)/
+    
+        use Regexp::Common;
+        LIKE "123.456E3" => qr[$RE{num}{real}];
+        # output:
+        # ok 4 - "123.456E3" =~ qr[$RE{num}{real}]
+    
+        LIKE "foo" => qr{bar};
+        # output:
+        # # Time: 2012-02-28 03:44:35 PM
+        # ./example.t:18:1: Test 5 Failed
+        # not ok 5 - "foo" =~ qr{bar}
+        # #   Failed test '"foo" =~ qr{bar}'
+        # #                   'foo'
+        # #     doesn't match '(?-xism:bar)'
+
+  UNLIKE
+    Takes two arguments, the first argument should be a string, and the
+    second argument should be a REGEXP. The regex will be run against the
+    string to verify that there is a negative match.
+
+    Examples:
+
+        UNLIKE "abc" => qr{^A};
+        # output:
+        # ok 1 - "abc" !~ qr{^A}
+    
+        UNLIKE "ABC" => qr{^a}i;
+        # output:
+        # # Time: 2012-02-28 03:54:31 PM
+        # ./example.t:5:1: Test 2 Failed
+        # not ok 2 - "ABC" !~ qr{^a}i
+        # #   Failed test '"ABC" !~ qr{^a}i'
+        # #                   'ABC'
+        # #           matches '(?i-xsm:^a)'
+    
+        UNLIKE "ABC" => qr/^(?i:a)/;
+        # output:
+        # # Time: 2012-02-28 03:54:31 PM
+        # ./example.t:14:1: Test 3 Failed
+        # not ok 3 - "ABC" !~ qr/^(?i:a)/
+        # #   Failed test '"ABC" !~ qr/^(?i:a)/'
+        # #                   'ABC'
+        # #           matches '(?-xism:^(?i:a))'
+    
+        use Regexp::Common;
+        UNLIKE "123.456E3" => qr[$RE{num}{int}];
+        # output:
+        # # Time: 2012-02-28 03:54:31 PM
+        # ./example.t:24:1: Test 4 Failed
+        # not ok 4 - "123.456E3" !~ qr[$RE{num}{int}]
+        # #   Failed test '"123.456E3" !~ qr[$RE{num}{int}]'
+        # #                   '123.456E3'
+        # #           matches '(?-xism:(?:(?:[+-]?)(?:[0123456789]+)))'
+    
+        UNLIKE "foo" => qr{bar};
+        # output:
+        # ok 5 - "foo" !~ qr{bar}
+
+  ERR
+    ERR is a wrapper to help capture exceptions to make analyzing error
+    cases easier. The argument to ERR is a subroutine or code block.
+
+    Examples:
+
+        package PosixErr;
+        use POSIX qw(strerror);
+        use overload '""' => \&stringify;
+        sub new { bless { code => $_[1] }, $_[0] }
+        sub stringify { strerror($_[0]->{code}) }
+    
+        package main;
+        IS ERR { die "OMG No!\n" } => "OMG No!\n";
+        # output:
+        # ok 1 - ERR { die "OMG No!\n" } == "OMG No!\n"
+    
+        IS ERR { die PosixErr->new(12) }  => PosixErr->new(12);
+        # output:
+        # ok 2 - ERR { die PosixErr->new(12) } == PosixErr->new(12)
+    
+        IS ERR { die PosixErr->new(12) }  => "Cannot allocate memory";
+        # output:
+        # ok 3 - ERR { die PosixErr->new(12) } == "Cannot allocate memory"
+    
+        IS ERR { die PosixErr->new(13) }  => "Knock it out, wiseguy";
+        # output:
+        # # Time: 2012-02-28 04:27:35 PM
+        # ./example.t:20:1: Test 4 Failed
+        # not ok 4 - ERR { die PosixErr->new(13) } == "Knock it out
+        # #   Failed test 'ERR { die PosixErr->new(13) } == "Knock it out'
+        # #          got: 'Permission denied'
+        # #     expected: 'Knock it out, wiseguy'
+    
+        IS ERR { die PosixErr->new(13) }  => "Permission denied";
+        # output:
+        # ok 5 - ERR { die PosixErr->new(13) } == "Permission denied"
+    
+        IS ERR { "ok" } => "ok";
+        # output:
+        # ok 6 - ERR { "ok" } == "ok"
+
+  TODO
+    TODO can be used a prefix to any test to indicate that it is a known
+    failure. For futher reading on TODO please read Test::More.
+
+    Examples:
+
+        TODO OK 1 == 2;
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:1:6: Test 1 Failed
+        # not ok 1 - 1 == 2 # TODO Test Know to fail
+        # #   Failed (TODO) test '1 == 2'
+    
+        TODO NOK 1 == 1;
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:8:6: Test 2 Failed
+        # not ok 2 - not [1 == 1] # TODO Test Know to fail
+        # #   Failed (TODO) test 'not [1 == 1]'
+    
+        TODO IS "abc" => "ABC";
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:15:6: Test 3 Failed
+        # not ok 3 - "abc" == "ABC" # TODO Test Know to fail
+        # #   Failed (TODO) test '"abc" == "ABC"'
+        # #          got: 'abc'
+        # #     expected: 'ABC'
+    
+        TODO ISNT "abc" => "abc";
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:24:6: Test 4 Failed
+        # not ok 4 - "abc" != "abc" # TODO Test Know to fail
+        # #   Failed (TODO) test '"abc" != "abc"'
+        # #          got: 'abc'
+        # #     expected: anything else
+    
+        TODO ISA [] => "HASH";
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:33:6: Test 5 Failed
+        # not ok 5 - [] ISA "HASH" # TODO Test Know to fail
+        # #   Failed (TODO) test '[] ISA "HASH"'
+    
+        TODO ID [] => [];
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:40:6: Test 6 Failed
+        # not ok 6 - [] == [] # TODO Test Know to fail
+        # #   Failed (TODO) test '[] == []'
+        # #          got: 'ARRAY(0x1c62a28)'
+        # #     expected: 'ARRAY(0x1c62a10)'
+    
+        TODO EQ 123 => 124;
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:49:6: Test 7 Failed
+        # not ok 7 - 123 == 124 # TODO Test Know to fail
+        # #   Failed (TODO) test '123 == 124'
+        # #          got: '123'
+        # #     expected: '124'
+    
+        TODO LIKE "abc" => qr/^ABC$/;
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:58:6: Test 8 Failed
+        # not ok 8 - "abc" =~ qr/^ABC$/ # TODO Test Know to fail
+        # #   Failed (TODO) test '"abc" =~ qr/^ABC$/'
+        # #                   'abc'
+        # #     doesn't match '(?-xism:^ABC$)'
+    
+        TODO UNLIKE "abc" => qr/^abc$/;
+        # output:
+        # # Time: 2012-02-28 04:39:55 PM
+        # ./example.t:67:6: Test 9 Failed
+        # not ok 9 - "abc" !~ qr/^abc$/ # TODO Test Know to fail
+        # #   Failed (TODO) test '"abc" !~ qr/^abc$/'
+        # #                   'abc'
+        # #           matches '(?-xism:^abc$)'
+
+  ENVIRONMENT
+   TEST_TRIVIAL_LOG
+    This environment variable will act as if --log=$ENV{TEST_TRIVIAL_LOG}
+    had been set.
+
+AUTHOR
+    2007-2012, Cory Bennett <cpan@corybennett.org>
+
+SEE ALSO
+    Test::More, Test::Harness, Text::Diff
+
+COPYRIGHT and LICENSE
+    Copyright (c) 2008 Yahoo! Inc. All rights reserved. The copyrights to
+    the contents of this file are licensed under the Perl Artistic License
+    (ver. 15 Aug 1997).
+

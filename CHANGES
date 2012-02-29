@@ -1,4 +1,7 @@
 ====================== CHANGELOG ======================
+Versopm 1.6
+- added perldoc documentation
+
 Version 1.5.6
 - guard against someone tweaking $/
 
