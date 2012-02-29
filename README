@@ -580,6 +580,10 @@ DESCRIPTION
 AUTHOR
     2007-2012, Cory Bennett <cpan@corybennett.org>
 
+SOURCE
+    The Source is available at github:
+    https://github.com/coryb/perl-test-trivial
+
 SEE ALSO
     Test::More, Test::Harness, Text::Diff
 

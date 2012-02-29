@@ -1151,6 +1151,10 @@ This environment variable will act as if B<--log=$ENV{TEST_TRIVIAL_LOG}> had bee
 
 2007-2012, Cory Bennett <cpan@corybennett.org>
 
+=head1 SOURCE
+
+The Source is available at github: https://github.com/coryb/perl-test-trivial
+
 =head1 SEE ALSO
 
 L<Test::More>, L<Test::Harness>, L<Text::Diff>
