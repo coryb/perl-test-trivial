@@ -1,5 +1,10 @@
 ====================== CHANGELOG ======================
-Versopm 1.6
+
+Version 1.6_01
+- minor doc change
+- update t/isa.t for older perl
+
+Version 1.6
 - added perldoc documentation
 
 Version 1.5.6

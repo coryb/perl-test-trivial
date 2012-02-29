@@ -15,7 +15,7 @@ use File::Basename;
 use constant IFS => $/;
 
 our $VERSION;
-$VERSION = "1.6";
+$VERSION = "1.6_01";
 $VERSION = eval $VERSION;
 
 FILTER {
@@ -569,29 +569,19 @@ Test::Trivial - Declutter and simplify tests
 
 =head1 SYNOPSIS
 
-use Test::Trivial tests => 11;
-
-OK $expression;
-
-NOK $expression;
-
-IS $got => $expected;
-
-ISNT $got => $expected;
-
-ISA $obj => $class;
-
-ID $refA => $refB;
-
-EQ $numA => $numB;
-
-LIKE $got => qr/regex/;
-
-UNLIKE $got => qr/regex/;
-
-IS ERR { die "OMG No!\n" } => "OMG No!\n";
-
-TODO IS $got, $expected;
+    use Test::Trivial tests => 11;
+    
+    OK $expression;
+    NOK $expression;
+    IS $got => $expected;
+    ISNT $got => $expected;
+    ISA $obj => $class;
+    ID $refA => $refB;
+    EQ $numA => $numB;
+    LIKE $got => qr/regex/;
+    UNLIKE $got => qr/regex/;
+    IS ERR { die "OMG No!\n" } => "OMG No!\n";
+    TODO IS $got, $expected;
 
 =head1 DESCRIPTION
 

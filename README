@@ -2,29 +2,19 @@ NAME
     Test::Trivial - Declutter and simplify tests
 
 SYNOPSIS
-    use Test::Trivial tests => 11;
-
-    OK $expression;
-
-    NOK $expression;
-
-    IS $got => $expected;
-
-    ISNT $got => $expected;
-
-    ISA $obj => $class;
-
-    ID $refA => $refB;
-
-    EQ $numA => $numB;
-
-    LIKE $got => qr/regex/;
-
-    UNLIKE $got => qr/regex/;
-
-    IS ERR { die "OMG No!\n" } => "OMG No!\n";
-
-    TODO IS $got, $expected;
+        use Test::Trivial tests => 11;
+    
+        OK $expression;
+        NOK $expression;
+        IS $got => $expected;
+        ISNT $got => $expected;
+        ISA $obj => $class;
+        ID $refA => $refB;
+        EQ $numA => $numB;
+        LIKE $got => qr/regex/;
+        UNLIKE $got => qr/regex/;
+        IS ERR { die "OMG No!\n" } => "OMG No!\n";
+        TODO IS $got, $expected;
 
 DESCRIPTION
     "Test::Trivial" was written to allow test writters to trivially write

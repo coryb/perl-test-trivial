@@ -10,10 +10,10 @@ TGZ=Test-Trivial-$(shell perl -MExtUtils::MakeMaker -le 'print MM->parse_version
 $(TGZ): dist
 
 upload: $(TGZ)
-	cpan-upload -v $(TGZ) --user $(USER)
+	echo cpan-upload -v $(TGZ) --user $(USER)
 
 Makefile:
-	/usr/bin/perl Makefile.PL
+	perl Makefile.PL
 
 test dist: Makefile
 	${MAKE} -f Makefile $@

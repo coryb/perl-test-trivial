@@ -14,9 +14,9 @@ use Test::Trivial tests => 10;
     # output:
     # ok 2 - {} ISA "HASH"
     
-    ISA qr/ABC/ => "REGEXP";
+    ISA qr/ABC/ => $] < 5.010 ? "Regexp" : "REGEXP";
     # output:
-    # ok 3 - qr/ABC/ ISA "REGEXP"
+    # ok 3 - qr/ABC/ ISA $] < 5.010 ? "Regexp" : "REGEXP"
 
     ISA \*STDIO => "GLOB";
     # output:
