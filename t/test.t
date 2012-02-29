@@ -1,7 +1,11 @@
-#!/home/y/bin/perl
+#!/usr/bin/perl
+use File::Basename qw(dirname);
+use lib dirname($0)."/../lib";
+
 use strict;
 use warnings;
 use Test::Trivial tests => 26;
+
 my @a=(1,2,3);
 OK @a;
 OK @a == 3;
