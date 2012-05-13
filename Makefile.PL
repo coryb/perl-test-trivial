@@ -4,7 +4,7 @@ WriteMakefile(
     AUTHOR  => 'Cory Bennett <cpan@corybennett.org>',
     NAME            => 'Test::Trivial',
     VERSION_FROM    => 'lib/Test/Trivial.pm',
-    LICENSE => 'Artisitic License',
+    LICENSE => 'artistic',
     PREREQ_PM => {
         "Test::More" => "0",
         "Regexp::Common" => "0",
