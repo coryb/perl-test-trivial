@@ -1,4 +1,6 @@
 ====================== CHANGELOG ======================
+Version 1.7
+- Fix licence as per Module::Build::API - Sandip Bhattacharya
 
 Version 1.6_01
 - minor doc change

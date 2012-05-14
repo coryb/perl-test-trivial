@@ -15,7 +15,7 @@ use File::Basename;
 use constant IFS => $/;
 
 our $VERSION;
-$VERSION = "1.6_01";
+$VERSION = "1.7";
 $VERSION = eval $VERSION;
 
 FILTER {
