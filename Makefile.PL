@@ -10,5 +10,6 @@ WriteMakefile(
         "Regexp::Common" => "0",
         "Text::Diff" => "0",
         "Filter::Simple" => "0",
+        "IO::Scalar" => "0",
     }
 );
