@@ -11,5 +11,6 @@ WriteMakefile(
         "Text::Diff" => "0",
         "Filter::Simple" => "0",
         "IO::Scalar" => "0",
+        "IO::Tee" => "0",
     }
 );
