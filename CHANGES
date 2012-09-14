@@ -1,4 +1,7 @@
 ====================== CHANGELOG ======================
+Version 1.9
+- Fix IO::Tee prereq - majestic
+
 Version 1.8
 - Fix IO::Scalar prereq - majestic
 
