@@ -1,4 +1,7 @@
 ====================== CHANGELOG ======================
+Version 1.10
+- try to work around errors finding the script after chdir called
+
 Version 1.9
 - Fix IO::Tee prereq - majestic
 
