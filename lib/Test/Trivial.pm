@@ -14,9 +14,8 @@ use Filter::Simple;
 use File::Basename;
 use constant IFS => $/;
 
-our $VERSION;
-$VERSION = "1.10";
-$VERSION = eval $VERSION;
+use version;
+our $VERSION = version->declare("1.901.0");
 
 FILTER {
     my @grps;
