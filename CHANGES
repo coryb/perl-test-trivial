@@ -1,4 +1,7 @@
 ====================== CHANGELOG ======================
+Version 1.901.1
+- fix t/isa.t with REGEXP types
+
 Version 1.901.0
 - try to work around errors finding the script after chdir called
 - fix versioning
