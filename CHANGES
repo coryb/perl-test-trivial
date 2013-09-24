@@ -1,4 +1,7 @@
 ====================== CHANGELOG ======================
+Version 1.901.2
+- fix t/isa.t with Regexp types
+
 Version 1.901.1
 - fix t/isa.t with REGEXP types
 
